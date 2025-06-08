@@ -1,0 +1,12 @@
+[
+  {
+    "username": "admin",
+    "password": "administrator",
+    "is_active": true
+  },
+  {
+    "username": "operator",
+    "password": "operator",
+    "is_active": true
+  }
+]

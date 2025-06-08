@@ -1,0 +1,62 @@
+version: '3.8'
+name: test-task
+services:
+  # PostgreSQL сервис
+  db:
+    image: postgres:16
+    env_file:
+      - .env
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      app-network:
+        ipv4_address: 172.20.0.2
+    restart: unless-stopped
+
+  # FastAPI бэкенд
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+    networks:
+      app-network:
+        ipv4_address: 172.20.0.3
+    restart: unless-stopped
+
+  # React фронтенд
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      app-network:
+        ipv4_address: 172.20.0.4
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+          gateway: 172.20.0.1
